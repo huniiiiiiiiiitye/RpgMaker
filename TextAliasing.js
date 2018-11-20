@@ -13,7 +13,7 @@
  * @text 拡縮率
  * @type number
  * @default 16
- * @desc 拡縮率を決めます。値が大きいほど非AAになりますが処理に時間が掛かります　16または2のn乗の値推奨
+ * @desc 拡縮率を決めます。値が大きいほど非AAになりますが処理に時間が掛かります　2のn乗の値推奨
  * @min 1
  * @max 64
  *
@@ -39,8 +39,16 @@
  * @value KOME
  * @default TASU
  *
+ * @param outLineDif
+ * @text アウトラインの距離
+ * @type number
+ * @default 2
+ * @desc 描画するアウトラインの距離を決めます。値が大きいほどアウトラインが大きくなりますが、ジラジラする可能性があります。
+ * @min 1
+ * @max 32
+ *
  * @help
- * パラメータのフォントサイズは使いたいフォントのサイズを確認の上
+ * ※パラメータのフォントサイズは使いたいフォントのサイズを確認の上
  * 設定してください。
  * 
  * プラグインコマンド詳細
@@ -63,7 +71,6 @@
  */
 
 (function () {
-
     var param = JSON.parse(JSON.stringify(PluginManager.parameters('TextAliasing'), function (key, value) {
         try {
             return JSON.parse(value);
@@ -79,6 +86,7 @@
     var bai = param.bai;
     var fontSizeBase = param.fontSizeBase;
     var drawOutLine = param.drawOutLine;
+    var outLineDif = param.outLineDif;
 
     var _Game_Interpreter_pluginCommand = Game_Interpreter.prototype.pluginCommand;
     Game_Interpreter.prototype.pluginCommand = function (command, args) {
@@ -89,7 +97,6 @@
             return;
         }
     }
-
 
     // フォントサイズを28に最も近い整数倍にする
     Window_Base.prototype.standardFontSize = function () {
@@ -155,7 +162,7 @@
 
         // 独自のアウトライン描画
         if (drawOutLine == 'TASU' || drawOutLine == 'KAKERU' || drawOutLine == 'KOME') {
-            var gap = Math.floor(this.fontSize / fontSizeBase);
+            var gap = Math.round(this.fontSize / fontSizeBase) / 2 * outLineDif;
 
             ctx.globalCompositeOperation = 'source-atop';
             ctx.fillStyle = this.outlineColor;
@@ -176,11 +183,4 @@
             }
         }
     };
-
-
-
-
-
-
-
 })();
